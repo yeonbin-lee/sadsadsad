@@ -45,5 +45,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         UserDetails userDetails = customUserDetailsService.loadUserByUserId(userId);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
+
+
 }
 

@@ -1,9 +1,10 @@
-package com.example.common_module.member.exception;
+package com.example.common_module.exception.global;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 
 import java.util.ArrayList;
@@ -61,6 +62,12 @@ public class ErrorResponse {
         this.status = code.getStatus();
         this.errors = errors;
         this.divisionCode = code.getDivisionCode();
+    }
+
+    @Builder
+    public ErrorResponse(HttpStatus httpStatus, String s) {
+        this.status = httpStatus.value();
+        this.resultMsg = s;
     }
 
 

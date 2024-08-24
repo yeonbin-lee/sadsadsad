@@ -1,7 +1,5 @@
-package com.example.common_module.member.exception;
+package com.example.common_module.exception.global;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -47,6 +45,7 @@ public class GlobalExceptionHandler {
         final ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_VALID_ERROR, String.valueOf(stringBuilder));
         return new ResponseEntity<>(response, HTTP_STATUS_OK);
     }
+
 
     /**
      * [Exception] API 호출 시 'Header' 내에 데이터 값이 유효하지 않은 경우

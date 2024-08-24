@@ -1,4 +1,4 @@
-package com.example.common_module.member.exception;
+package com.example.common_module.exception.global;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

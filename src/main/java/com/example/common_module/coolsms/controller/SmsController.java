@@ -27,6 +27,13 @@ public class SmsController {
         return ResponseEntity.ok("문자를 전송했습니다.");
     }
 
+    /** 비용 문제로 만든 Redis 저장 인증코드*/
+    @PostMapping("/fake/send")
+    public ResponseEntity<?> fakeSendSMS(@RequestBody @Valid SmsRequestDTO smsRequestDto){
+        smsService.fakeSendSms(smsRequestDto);
+        return ResponseEntity.ok("문자를 전송했습니다.");
+    }
+
     @PostMapping("/verify")
     public ResponseEntity<?> verifySMS(@RequestBody @Valid SmsVerifyDTO smsVerifyDTO){
         return new ResponseEntity<>(smsService.verifySms(smsVerifyDTO), HttpStatus.OK);

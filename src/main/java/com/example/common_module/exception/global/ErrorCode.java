@@ -1,8 +1,6 @@
-package com.example.common_module.member.exception;
+package com.example.common_module.exception.global;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 /**
  * [공통 코드] API 통신에 대한 '에러 코드'를 Enum 형태로 관리를 한다.
@@ -65,7 +63,6 @@ public enum ErrorCode {
 
     // 서버가 처리 할 방법을 모르는 경우 발생
     INTERNAL_SERVER_ERROR(500, "G999", "Internal Server Error Exception"),
-
 
     /**
      * ******************************* Custom Error CodeList ***************************************

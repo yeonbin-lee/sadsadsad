@@ -38,8 +38,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.REMOVE)
-    private Auth auth;
+//    @OneToOne(mappedBy = "member", cascade = CascadeType.REMOVE)
+//    private Auth auth;
 
     @Builder
     public Member(String nickname, String email, String password, String phone, Gender gender, LocalDate birthday, Role role) {

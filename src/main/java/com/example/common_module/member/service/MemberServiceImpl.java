@@ -1,10 +1,17 @@
 package com.example.common_module.member.service;
 
+import com.example.common_module.coolsms.model.entity.Sms;
+import com.example.common_module.coolsms.repository.SmsRepository;
+import com.example.common_module.coolsms.service.SmsService;
+import com.example.common_module.exception.custom.NotEqualsCodeException;
+import com.example.common_module.exception.custom.UserNotFoundException;
+import com.example.common_module.member.domain.dto.FindEmailDTO;
 import com.example.common_module.member.domain.dto.MemberRequestDTO;
 import com.example.common_module.member.domain.entity.Member;
 import com.example.common_module.member.domain.dto.MemberResponseDTO;
 import com.example.common_module.member.domain.dto.MemberUpdateDTO;
 import com.example.common_module.member.domain.entity.Role;
+import com.example.common_module.member.repository.FindEmailRepository;
 import com.example.common_module.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +25,9 @@ public class MemberServiceImpl implements MemberService{
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FindEmailRepository findEmailRepository;
+    private final SmsRepository smsRepository;
+    private final SmsService smsService;
 
     /**
      * 회원가입
@@ -31,7 +41,6 @@ public class MemberServiceImpl implements MemberService{
         if(memberRepository.existsByEmail(requestDto.getEmail())){
 //            throw new IllegalArgumentException("중복되는 이메일입니다.");
             throw new DataIntegrityViolationException("중복되는 이메일입니다.");
-            
         }
 
         if(memberRepository.existsByPhone(requestDto.getPhone())){
@@ -86,4 +95,45 @@ public class MemberServiceImpl implements MemberService{
         return memberRepository.existsByEmail(email);
     }
 
+    /** 1. 비밀번호 재설정
+     *  - 비밀번호를 잊어버렸을 경우
+     *  1) coolSms를 통해 전화번호로 인증코드 전송
+     *  2) 인증코드를 Redis에 저장한 후, (key: 전화번호, value:인증코드) 형태로 저장
+     *  3) Redis 내에 인증코드가 존재한다면 password 재설정
+     * */
+
+    /** 2. 비밀번호 재설정
+     *  - 비밀번호를 변경하고싶을 경우
+     *  1) User로부터 받은 비밀번호와 Access Token으로 찾은 password 비교
+     *  2) 같을 경우 password 재설정
+     * */
+
+
+    /**
+     * 1) CoolSms를 통해 User에게 인증코드 전송
+     * 2) 받은 인증코드를 Redis내에 (key: 전화번호, value:인증코드) 형태로 저장
+     * 3) Redis 내에 인증코드가 존재한다면 email 반환
+     * @return
+     */
+    public String findEmailByPhone(FindEmailDTO findEmailDTO) {
+
+        String phoneNum = findEmailDTO.getPhoneNum();
+
+        // Redis 내에 Key(전화번호)가 존재하는지 확인
+        Sms sms = smsRepository.findById(phoneNum).orElseThrow(
+                () -> new NullPointerException("등록되지 않은 전화번호입니다.")
+        );
+
+        // 타임아웃이 짧기 때문에 굳이 삭제할 필요는 없을 듯
+//        smsRepository.deleteById(phoneNum);
+
+        if (findEmailDTO.getCode().equals(sms.getCode())) {
+            Member member = memberRepository.findByPhone(findEmailDTO.getPhoneNum()).orElseThrow(
+                    () -> new UserNotFoundException("전화번호 정보가 존재하지 않습니다.")
+            );
+            return member.getEmail();
+        }
+        // 인증코드가 일치하지않는 경우
+        throw new NotEqualsCodeException();
+    }
 }

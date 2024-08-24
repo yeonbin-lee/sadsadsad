@@ -1,13 +1,11 @@
 package com.example.common_module.member.controller;
 
 import com.example.common_module.jwt.JwtTokenProvider;
-import com.example.common_module.member.domain.dto.CheckEmailDuplicateDTO;
-import com.example.common_module.member.domain.dto.MemberRequestDTO;
-import com.example.common_module.member.domain.dto.MemberResponseDTO;
-import com.example.common_module.member.domain.dto.MemberUpdateDTO;
+import com.example.common_module.member.domain.dto.*;
 import com.example.common_module.member.service.MemberService;
 import com.example.common_module.member.service.MemberServiceImpl;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,21 +30,38 @@ public class MemberController {
     @PostMapping("/api/v1/auth/signup")
     public ResponseEntity<?> singUp(@RequestBody @Valid MemberRequestDTO requestDto) {
         try{
-            this.memberService.signup(requestDto);
+            memberService.signup(requestDto);
             return ResponseEntity.status(HttpStatus.OK).body("User registered successfully!");
         } catch (IllegalStateException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-
     }
+
+    /** 전화번호로 이메일 찾기 */
+    @PostMapping("/find/email")
+    public ResponseEntity<?> findEmailByPhone(@RequestBody @Valid FindEmailDTO findEmailDTO){
+        try{
+            String email = memberService.findEmailByPhone(findEmailDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(email);
+        } catch (IllegalStateException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    /** 1. 비밀번호 재설정
+     *  - 비밀번호를 잊어버렸을 경우
+     * */
+
+    /** 2. 비밀번호 재설정
+     *  - 비밀번호를 변경하고싶을 경우
+     * */
 
     /** 회원정보 조회 API */
     @GetMapping("/api/v1/user")
     public ResponseEntity<?> findUser(@RequestHeader("Authorization") String accessToken) {
         System.out.println("access_token=" + accessToken);
-        Long id = this.jwtTokenProvider.getUserIdFromToken(accessToken.substring(7));
-        MemberResponseDTO userResponseDto = this.memberService.findById(id);
+        Long id = jwtTokenProvider.getUserIdFromToken(accessToken.substring(7));
+        MemberResponseDTO userResponseDto = memberService.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(userResponseDto);
     }
 
@@ -55,16 +70,16 @@ public class MemberController {
     @PutMapping("/api/v1/user")
     public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String accessToken,
                                         @RequestBody MemberUpdateDTO requestDto) {
-        Long id = this.jwtTokenProvider.getUserIdFromToken(accessToken.substring(7));
-        this.memberService.update(id, requestDto);
+        Long id = jwtTokenProvider.getUserIdFromToken(accessToken.substring(7));
+        memberService.update(id, requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     /** 회원정보 삭제 API */
     @DeleteMapping("/api/v1/user")
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String accessToken) {
-        Long id = this.jwtTokenProvider.getUserIdFromToken(accessToken.substring(7));
-        this.memberService.delete(id);
+        Long id = jwtTokenProvider.getUserIdFromToken(accessToken.substring(7));
+        memberService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 }

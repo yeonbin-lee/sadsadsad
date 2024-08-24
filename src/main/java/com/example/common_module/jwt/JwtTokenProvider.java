@@ -1,20 +1,28 @@
 package com.example.common_module.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
+import java.util.Optional;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
+
     @Value("${spring.jwt.secret}")
     private String jwtSecretKey;
     @Value("${spring.jwt.accessTokenExpirationTime}")
     private Long jwtAccessTokenExpirationTime;
     @Value("${spring.jwt.refreshTokenExpirationTime}")
     private Long jwtRefreshTokenExpirationTime;
+
 
     public String generateAccessToken(Authentication authentication) {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -29,9 +37,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    /** access_token, refresh_token 모두 갱신된다*/
     public String generateRefreshToken(Authentication authentication) {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         Date expireDate = new Date(new Date().getTime() + jwtRefreshTokenExpirationTime);
+
         return Jwts.builder()
                 .setSubject(customUserDetails.getUsername()) // email
                 .claim("user-id", customUserDetails.getId())
@@ -92,4 +102,6 @@ public class JwtTokenProvider {
         }
         return false;
     }
+
 }
+
