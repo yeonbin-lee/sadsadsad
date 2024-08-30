@@ -1,10 +1,15 @@
 package com.example.common_module.domain.auth.service;
 
+import com.example.common_module.domain.auth.controller.vo.TermAcceptance;
 import com.example.common_module.domain.member.controller.vo.KakaoInfo;
 import com.example.common_module.domain.auth.controller.dto.request.MemberSignupRequest;
 import com.example.common_module.domain.member.controller.vo.KakaoToken;
 import com.example.common_module.domain.auth.controller.dto.response.LoginResponse;
+import com.example.common_module.domain.member.entity.MemberTerm;
+import com.example.common_module.domain.member.entity.Term;
 import com.example.common_module.domain.member.entity.enums.Provider;
+import com.example.common_module.domain.member.repository.MemberTermRepository;
+import com.example.common_module.domain.member.repository.TermRepository;
 import com.example.common_module.global.config.jwt.CustomUserDetails;
 import com.example.common_module.global.config.jwt.JwtTokenProvider;
 import com.example.common_module.global.config.jwt.RefreshToken;
@@ -34,17 +39,23 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
+    private final TermRepository termRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final KakaoClient kakaoClient;
+    private final MemberTermRepository memberTermRepository;
 
 
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
@@ -90,7 +101,92 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         memberRepository.save(member);
+
     }
+
+
+//    /** [일반] 이메일 회원가입 API
+//     * 이메일, 전화번호, 닉네임 중복 체크
+//     * 중복 없을 시 member 저장
+//     * */
+//    @Transactional
+//    public void signup(MemberSignupRequest request) {
+//
+//        // CHECK EMAIL, PHONE, NICKNAME DUPLICATE
+//        if(memberRepository.existsByEmail(request.getEmail())){
+//            throw new DataIntegrityViolationException("중복되는 이메일입니다.");
+//        }
+//
+//        if(memberRepository.existsByPhone(request.getPhone())){
+//            throw new DataIntegrityViolationException("중복되는 전화번호입니다.");
+//        }
+//
+//        if(memberRepository.existsByNickname(request.getNickname())){
+//            throw new DataIntegrityViolationException("중복되는 닉네임입니다.");
+//        }
+//
+//        // BUILD MEMBER ENTITY
+//        Member member = Member.builder()
+//                .email(request.getEmail())
+//                .nickname(request.getNickname())
+//                .phone(request.getPhone())
+//                .gender(request.getGender())
+//                .password(passwordEncoder.encode(request.getPassword()))
+//                .birthday(request.getBirthday())
+//                .role(Role.ROLE_USER)
+//                .provider(Provider.NORMAL)
+//                .build();
+//
+//
+//        // 필수 약관 처리
+//        List<Term> mandatoryTerms = termRepository.findByMandatoryTrue();
+//
+//        Map<Long, Boolean> termAcceptancesMap = request.getTermAcceptances().stream()
+//                .collect(Collectors.toMap(TermAcceptance::getTermId, TermAcceptance::isAccepted));
+//
+//        List<MemberTerm> memberTerms = new ArrayList<>();
+//
+//        for (Term term : mandatoryTerms) {
+//            Boolean accepted = termAcceptancesMap.get(term.getId());
+//
+//            if (accepted == null || !accepted) {
+//                throw new RuntimeException("You must accept all mandatory terms and conditions.");
+//            }
+//
+//            MemberTerm memberTerm= MemberTerm.builder()
+//                    .member(member)
+//                    .term(term)
+//                    .accepted(accepted)
+//                    .build();
+//
+//            memberTerms.add(memberTerm);
+//        }
+//
+//
+//        // 선택 약관 처리
+//        for (TermAcceptance termAcceptance : request.getTermAcceptances()) {
+//            if (!termAcceptancesMap.containsKey(termAcceptance.getTermId())) {
+//                continue;
+//            }
+//
+//            Term term = termRepository.findById(termAcceptance.getTermId())
+//                    .orElseThrow(() -> new RuntimeException("Invalid term ID"));
+//
+//            if (!term.isMandatory()) {
+//                MemberTerm memberTerm= MemberTerm.builder()
+//                        .member(member)
+//                        .term(term)
+//                        .accepted(termAcceptance.isAccepted())
+//                        .build();
+//
+//                memberTerms.add(memberTerm);
+//            }
+//        }
+//
+//        member.setMemberTerms(memberTerms);
+//
+//        memberRepository.save(member);
+//    }
 
 
     /** [일반] 로그인 API */

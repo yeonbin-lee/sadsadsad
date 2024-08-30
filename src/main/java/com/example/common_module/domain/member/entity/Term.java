@@ -1,11 +1,13 @@
 package com.example.common_module.domain.member.entity;
 
-import com.example.common_module.domain.member.entity.enums.Mandatory;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
+//@NoArgsConstructor
 @Entity
+@Getter
 public class Term {
 
     @Id
@@ -19,9 +21,13 @@ public class Term {
     @Column
     private String content;
 
-    // 의무 여부
-    @Enumerated(EnumType.STRING)
-    private Mandatory mandatory;
+    private boolean mandatory; // 필수 여부
+
+    private LocalDate createdDate;
+
+//    // 의무 여부
+//    @Enumerated(EnumType.STRING)
+//    private Mandatory mandatory;
 //
 //    @Column
 //    private LocalDate created_at;

@@ -1,10 +1,10 @@
 package com.example.common_module.domain.member.entity;
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
+import lombok.Builder;
 
 @Entity
-public class MemberTerms {
+@Builder
+public class MemberTerm {
 
     @Id
     @Column(name = "member_terms_id")
@@ -20,8 +20,8 @@ public class MemberTerms {
     private Term term;
 
     @Column
-    private Boolean agreed;
+    private Boolean accepted;
 
-    @Column
-    private LocalDate agreed_at;
+//    @Column
+//    private LocalDate accepted_at;
 }

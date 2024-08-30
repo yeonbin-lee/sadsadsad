@@ -1,5 +1,6 @@
 package com.example.common_module.domain.auth.controller.dto.request;
 
+import com.example.common_module.domain.auth.controller.vo.TermAcceptance;
 import com.example.common_module.domain.member.entity.enums.Gender;
 import com.example.common_module.domain.member.entity.Member;
 import com.example.common_module.domain.member.entity.enums.Provider;
@@ -12,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -40,6 +42,9 @@ public class MemberSignupRequest {
     private LocalDate birthday;
 
     private Provider provider;
+
+    private List<TermAcceptance> termAcceptances;
+
 
     public Member toEntity() {
         return Member.builder()

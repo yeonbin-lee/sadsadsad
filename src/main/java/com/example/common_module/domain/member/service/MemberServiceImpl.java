@@ -37,7 +37,7 @@ public class MemberServiceImpl implements MemberService{
     }
 
 
-    /** User 삭제 */
+    /** Member 삭제 */
     @Override
     @Transactional
     public void delete(String accessToken) {
