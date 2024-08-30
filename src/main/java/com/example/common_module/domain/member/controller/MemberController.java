@@ -17,9 +17,9 @@ public class MemberController {
 
 
     /** 이메일 중복체크 */
+    // Q. 어떤 provider를 사용하는지 알려아하는가? ex) normal, kakao
     @PostMapping("/api/v1/user/email/duplicate")
     public ResponseEntity<?> emailDuplicate(@RequestBody @Valid CheckEmailDuplicateRequest requestDto){
-        System.out.println("들어온 이메일 =" +requestDto.getEmail());
         Boolean checkEmailDuplicate = memberService.checkDuplicateEmail(requestDto.getEmail());
         return ResponseEntity.status(HttpStatus.OK).body(checkEmailDuplicate);
     }
@@ -41,12 +41,8 @@ public class MemberController {
      * */
     @PutMapping("/change/password/v1")
     public ResponseEntity<?> changePasswordV1(@RequestBody @Valid PwFindRequest pwFindRequest){
-        try{
-            memberService.changePasswordV1(pwFindRequest);
-            return ResponseEntity.status(HttpStatus.OK).body("Password changed successfully!");
-        } catch (IllegalStateException e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        memberService.changePasswordV1(pwFindRequest);
+        return ResponseEntity.status(HttpStatus.OK).body("Password changed successfully!");
     }
 
     /** 2. 비밀번호 재설정

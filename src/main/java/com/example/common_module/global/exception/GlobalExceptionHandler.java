@@ -153,12 +153,12 @@ public class GlobalExceptionHandler {
 //        return new ResponseEntity<>(response, HTTP_STATUS_OK);
 //    }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    protected ResponseEntity<ErrorResponse> handleDuplicateInfoException(DataIntegrityViolationException ex) {
-        log.error("handleDuplicateInfoException", ex);
-        final ErrorResponse response = ErrorResponse.of(ErrorCode.DUPLICATE_INFO_ERROR, ex.getMessage());
-        return new ResponseEntity<>(response, HTTP_STATUS_OK);
-    }
+//    @ExceptionHandler(DataIntegrityViolationException.class)
+//    protected ResponseEntity<ErrorResponse> handleDuplicateInfoException(DataIntegrityViolationException ex) {
+//        log.error("handleDuplicateInfoException", ex);
+//        final ErrorResponse response = ErrorResponse.of(ErrorCode.DUPLICATE_INFO_ERROR, ex.getMessage());
+//        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+//    }
 
     // ==================================================================================================================
 

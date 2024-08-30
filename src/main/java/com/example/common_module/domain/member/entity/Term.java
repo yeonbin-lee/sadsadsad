@@ -22,12 +22,12 @@ public class Term {
     // 의무 여부
     @Enumerated(EnumType.STRING)
     private Mandatory mandatory;
-
-    @Column
-    private LocalDate created_at;
-
-    @Column
-    private LocalDate updated_at;
+//
+//    @Column
+//    private LocalDate created_at;
+//
+//    @Column
+//    private LocalDate updated_at;
 
 
 }

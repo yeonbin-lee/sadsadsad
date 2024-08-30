@@ -1,25 +1,19 @@
 package com.example.common_module.domain.coolsms.service;
 
-import com.example.common_module.domain.coolsms.utils.SmsCertificationUtil;
 import com.example.common_module.domain.coolsms.repository.SmsRepository;
+import com.example.common_module.domain.coolsms.utils.SmsCertificationUtil;
 import com.example.common_module.domain.coolsms.entity.Sms;
 import com.example.common_module.domain.coolsms.controller.dto.request.SmsRequest;
 import com.example.common_module.domain.coolsms.controller.dto.request.SmsVerifyRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class SmsServiceImpl implements SmsService {
 
     private final SmsCertificationUtil smsCertificationUtil;
     private final SmsRepository smsRepository;
-
-
-    //의존성 주입
-    public SmsServiceImpl(@Autowired SmsCertificationUtil smsCertificationUtil, SmsRepository smsRepository) {
-        this.smsCertificationUtil = smsCertificationUtil;
-        this.smsRepository = smsRepository;
-    }
 
     @Override // SmsService 인터페이스 메서드 구현
     public void sendSms(SmsRequest smsRequest) {

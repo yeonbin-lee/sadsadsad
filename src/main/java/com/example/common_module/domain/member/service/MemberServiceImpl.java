@@ -13,8 +13,6 @@ import com.example.common_module.domain.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +26,13 @@ public class MemberServiceImpl implements MemberService{
     private final JwtTokenProvider jwtTokenProvider;
 
 
-    /** User 조회 */
+    /** Member 조회 */
     @Override
     @Transactional
     public MemberResponse findById(String accessToken) {
         Long id = findMemberIdByAccessToken(accessToken);
         Member member = this.memberRepository.findById(id).orElseThrow(
-                () -> new UserNotFoundException("해당 유저를 찾을 수 없습니다. member_id = " + id));
+                () -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
         return new MemberResponse(member);
     }
 
@@ -54,6 +52,7 @@ public class MemberServiceImpl implements MemberService{
         return memberRepository.existsByEmail(email);
     }
 
+
     /** 1. 비밀번호 재설정
      *  - 비밀번호를 잊어버렸을 경우
      *  1) coolSms를 통해 전화번호로 인증코드 전송
@@ -70,11 +69,13 @@ public class MemberServiceImpl implements MemberService{
 
         if (code.equals(sms.getCode())) {
             Member member = memberRepository.findByPhone(phone).orElseThrow(
-                    () -> new UserNotFoundException("전화번호 정보가 존재하지 않습니다.")
+                    () -> new UserNotFoundException("등록되지 않은 전화번호입니다.")
             );
             String encryptPassword = passwordEncoder.encode(new_password);
             member.updatePassword(encryptPassword);
             memberRepository.save(member);
+        } else {
+            throw new NotEqualsCodeException("인증번호가 일치하지 않습니다.");
         }
     }
 
@@ -91,14 +92,14 @@ public class MemberServiceImpl implements MemberService{
         Long id = findMemberIdByAccessToken(accessToken);
         Member member = memberRepository.findById(id).orElseThrow(
                 () -> new UserNotFoundException("회원 정보가 존재하지 않습니다.")
-        );;
+        );
 
-        if(passwordEncoder.matches(pwChangeRequest.getOriginPassword(), member.getPassword())) {
+        if(passwordEncoder.matches(originPassword, member.getPassword())) {
             String encryptPassword = passwordEncoder.encode(newPassword);
             member.updatePassword(encryptPassword);
             memberRepository.save(member);
         } else {
-            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+            throw new NotEqualsPasswordException("비밀번호가 일치하지 않습니다.");
         }
     }
 
@@ -134,7 +135,7 @@ public class MemberServiceImpl implements MemberService{
 
         if (findEmailByPhoneRequest.getCode().equals(sms.getCode())) {
             Member member = memberRepository.findByPhone(findEmailByPhoneRequest.getPhoneNum()).orElseThrow(
-                    () -> new UserNotFoundException("전화번호 정보가 존재하지 않습니다.")
+                    () -> new UserNotFoundException("등록되지 않은 전화번호입니다.")
             );
             return member.getEmail();
         }
@@ -146,7 +147,7 @@ public class MemberServiceImpl implements MemberService{
 
         // Redis 내에 Key(전화번호)가 존재하는지 확인
         Sms sms = smsRepository.findById(phone).orElseThrow(
-                () -> new NullPointerException("등록되지 않은 전화번호입니다.")
+                () -> new UserNotFoundException("등록되지 않은 전화번호입니다.")
         );
         // 타임아웃이 짧기 때문에 굳이 삭제할 필요는 없을 수도 있다ㅏ..
         smsRepository.deleteById(phone);
@@ -154,7 +155,6 @@ public class MemberServiceImpl implements MemberService{
     }
 
     private Long findMemberIdByAccessToken(String accessToken){
-        Long id = jwtTokenProvider.getUserIdFromToken(accessToken.substring(7));
-        return id;
+        return jwtTokenProvider.getUserIdFromToken(accessToken.substring(7));
     }
 }
