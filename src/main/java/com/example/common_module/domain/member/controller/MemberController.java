@@ -59,12 +59,8 @@ public class MemberController {
     /** 회원 닉네임 수정 */
     @PutMapping("/change/nickname")
     public ResponseEntity<?> changeNickname(@RequestHeader("Authorization") String accessToken, @RequestBody @Valid NicknameChangeRequest nicknameChangeRequest) {
-        try{
             memberService.changeNickname(accessToken, nicknameChangeRequest);
             return ResponseEntity.status(HttpStatus.OK).body("Nickname changed successfully!");
-        } catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
     }
 
     /** 회원정보 조회 API */

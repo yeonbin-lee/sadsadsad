@@ -8,6 +8,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 //@AllArgsConstructor
@@ -25,7 +26,7 @@ public class Member {
     @Column(unique = true)
     private String email;
 
-    @Column
+    @Column(unique = true)
     private String nickname;
 
     @Column(unique = true)
@@ -45,6 +46,9 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private Provider provider;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Profile> profiles = new ArrayList<Profile>();
 
 //    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
 //    private List<MemberTerm> memberTerms;

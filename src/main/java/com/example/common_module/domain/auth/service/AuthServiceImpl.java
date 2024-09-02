@@ -6,10 +6,9 @@ import com.example.common_module.domain.auth.controller.dto.request.SignupReques
 import com.example.common_module.domain.member.controller.vo.KakaoToken;
 import com.example.common_module.domain.auth.controller.dto.response.LoginResponse;
 import com.example.common_module.domain.member.entity.Logout;
+import com.example.common_module.domain.member.entity.Profile;
 import com.example.common_module.domain.member.entity.enums.Provider;
-import com.example.common_module.domain.member.repository.LogoutRepository;
-import com.example.common_module.domain.member.repository.MemberTermRepository;
-import com.example.common_module.domain.member.repository.TermRepository;
+import com.example.common_module.domain.member.repository.*;
 import com.example.common_module.global.config.jwt.CustomUserDetails;
 import com.example.common_module.global.config.jwt.JwtTokenProvider;
 import com.example.common_module.global.config.jwt.RefreshToken;
@@ -19,7 +18,6 @@ import com.example.common_module.domain.auth.controller.dto.request.LoginRequest
 import com.example.common_module.domain.member.entity.enums.Gender;
 import com.example.common_module.domain.member.entity.Member;
 import com.example.common_module.domain.member.entity.enums.Role;
-import com.example.common_module.domain.member.repository.MemberRepository;
 import com.example.common_module.domain.auth.service.helper.KakaoClient;
 import com.example.common_module.global.exception.custom.SocialLoginException;
 import com.example.common_module.global.exception.custom.UserNotFoundException;
@@ -54,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
     private final KakaoClient kakaoClient;
     private final MemberTermRepository memberTermRepository;
     private final LogoutRepository logoutRepository;
+//    private final ProfileRepository profileRepository;
 
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String KAKAO_CLIENT_ID;
@@ -65,9 +64,45 @@ public class AuthServiceImpl implements AuthService {
     private String KAKAO_CLIENT_SECRET;
 
 
+//    /** [일반] 이메일 회원가입 API
+//     * 이메일, 전화번호, 닉네임 중복 체크
+//     * 중복 없을 시 member 저장
+//     * */
+//    @Transactional
+//    public void signup(SignupRequest request) {
+//
+//        // CHECK EMAIL, PHONE, NICKNAME DUPLICATE
+//        if(memberRepository.existsByEmail(request.getEmail())){
+//            throw new DataIntegrityViolationException("중복되는 이메일입니다.");
+//        }
+//
+//        if(memberRepository.existsByPhone(request.getPhone())){
+//            throw new DataIntegrityViolationException("중복되는 전화번호입니다.");
+//        }
+//
+//        if(memberRepository.existsByNickname(request.getNickname())){
+//            throw new DataIntegrityViolationException("중복되는 닉네임입니다.");
+//        }
+//
+//        // SAVE MEMBER ENTITY
+//        Member member = Member.builder()
+//                .email(request.getEmail())
+//                .nickname(request.getNickname())
+//                .phone(request.getPhone())
+//                .gender(request.getGender())
+//                .password(passwordEncoder.encode(request.getPassword()))
+//                .birthday(request.getBirthday())
+//                .role(Role.ROLE_USER)
+//                .provider(Provider.NORMAL)
+//                .build();
+//
+//        memberRepository.save(member);
+//    }
+
     /** [일반] 이메일 회원가입 API
      * 이메일, 전화번호, 닉네임 중복 체크
      * 중복 없을 시 member 저장
+     * 프로필 저장 Version
      * */
     @Transactional
     public void signup(SignupRequest request) {
@@ -96,24 +131,24 @@ public class AuthServiceImpl implements AuthService {
                 .role(Role.ROLE_USER)
                 .provider(Provider.NORMAL)
                 .build();
-//        Member member = new Member();
-//        member.setEmail(request.getEmail());
-//        member.setNickname(request.getNickname());
-//        member.setPhone(request.getPhone());
-//        member.setGender(request.getGender());
-//        member.setPassword(passwordEncoder.encode(request.getPassword()));
-//        member.setBirthday(request.getBirthday());
-//        member.setRole(Role.ROLE_USER);
-//        member.setProvider(Provider.NORMAL);
+
+//        Profile profile = Profile.builder()
+//                .member(member)
+//                .nickname(request.getNickname())
+//                .gender(request.getGender())
+//                .birthday(request.getBirthday())
+//                .owner(Boolean.TRUE)
+//                .build();
 
         memberRepository.save(member);
-
+//        profileRepository.save(profile);
     }
 
 
 //    /** [일반] 이메일 회원가입 API
 //     * 이메일, 전화번호, 닉네임 중복 체크
 //     * 중복 없을 시 member 저장
+//     * 이용약관 추가 ver
 //     * */
 //    @Transactional
 //    public void signup(MemberSignupRequest request) {

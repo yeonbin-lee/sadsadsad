@@ -8,6 +8,7 @@ import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -107,6 +108,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HTTP_STATUS_OK);
     }
 
+
+
+    @ExceptionHandler(EmptyResultDataAccessException.class)
+    protected ResponseEntity<ErrorResponse> handleEmptyResultDataAccessException (EmptyResultDataAccessException e) {
+        log.error("EmptyResultDataAccessException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.NO_DATA, e.getMessage());
+        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+    }
 
     /**
      * [Exception] API 호출 시 '객체' 혹은 '파라미터' 데이터 값이 유효하지 않은 경우
