@@ -2,24 +2,22 @@ package com.example.common_module.global.exception;
 
 import com.example.common_module.global.exception.custom.SocialLoginException;
 import com.example.common_module.global.exception.custom.UserNotFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingRequestHeaderException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-
-import java.io.IOException;
 
 /**
  * Controller 내에서 발생하는 Exception 대해서 Catch 하여 응답값(Response)을 보내주는 기능을 수행함.
@@ -74,6 +72,40 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HTTP_STATUS_OK);
     }
 
+    @ExceptionHandler(SignatureException.class)
+    protected ResponseEntity<ErrorResponse> handleSignatureException (SignatureException e) {
+        log.error("SignatureException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.WRONG_TYPE_TOKEN, e.getMessage());
+        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    protected ResponseEntity<ErrorResponse> handleMalformedJwtException (MalformedJwtException e) {
+        log.error("MalformedJwtException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.UNKNOWN_ERROR, e.getMessage());
+        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    protected ResponseEntity<ErrorResponse> handleExpiredJwtException (ExpiredJwtException e) {
+        log.error("ExpiredJwtException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.EXPIRED_TOKEN, e.getMessage());
+        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+    }
+
+    @ExceptionHandler(UnsupportedJwtException.class)
+    protected ResponseEntity<ErrorResponse> handleUnsupportedJwtException (UnsupportedJwtException e) {
+        log.error("UnsupportedJwtException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.UNSUPPORTED_TOKEN, e.getMessage());
+        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected ResponseEntity<ErrorResponse> handleIllegalArgumentException (IllegalArgumentException e) {
+        log.error("IllegalArgumentException", e);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.ACCESS_DENIED, e.getMessage());
+        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+    }
 
 
     /**

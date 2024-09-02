@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 import java.util.List;
 
+//@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -45,8 +46,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<MemberTerm> memberTerms;
+//    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+//    private List<MemberTerm> memberTerms;
 
 
     @Builder

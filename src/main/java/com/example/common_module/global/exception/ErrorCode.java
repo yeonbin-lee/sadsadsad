@@ -43,6 +43,13 @@ public enum ErrorCode {
 
     NOT_VALID_ERROR(404, "G005", "handle Validation Exception"),
 
+
+    UNKNOWN_ERROR(404, "G006", "토큰이 존재하지 않습니다."),
+    WRONG_TYPE_TOKEN(404, "G007","변조된 토큰입니다."),
+    EXPIRED_TOKEN(404, "G008" ,"만료된 토큰입니다."),
+    UNSUPPORTED_TOKEN(404,"G009" ,"변조된 토큰입니다."),
+    ACCESS_DENIED(404, "G010","권한이 없습니다."),
+
     // 입력/출력 값이 유효하지 않음
 //    IO_ERROR(400, "G006", "I/O Exception"),
 

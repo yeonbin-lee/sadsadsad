@@ -1,10 +1,11 @@
 package com.example.common_module.domain.auth.controller;
 
+import com.example.common_module.domain.auth.controller.dto.request.LogoutRequest;
 import com.example.common_module.domain.auth.service.AuthService;
 import com.example.common_module.domain.auth.controller.dto.request.OauthMemberLoginRequest;
-import com.example.common_module.domain.auth.controller.dto.request.MemberLoginRequest;
+import com.example.common_module.domain.auth.controller.dto.request.LoginRequest;
 import com.example.common_module.domain.auth.controller.dto.response.LoginResponse;
-import com.example.common_module.domain.auth.controller.dto.request.MemberSignupRequest;
+import com.example.common_module.domain.auth.controller.dto.request.SignupRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,14 +30,14 @@ public class AuthController {
 
     /** [일반] 이메일 회원가입 API */
     @PostMapping("/api/v1/auth/signup")
-    public ResponseEntity<?> singUp(@RequestBody @Valid MemberSignupRequest request) {
+    public ResponseEntity<?> singUp(@RequestBody @Valid SignupRequest request) {
         authService.signup(request);
         return ResponseEntity.status(HttpStatus.OK).body("User registered successfully!");
     }
 
     /** [일반] 로그인 API */
     @PostMapping("/api/v1/auth/login")
-    public ResponseEntity<?> login(@RequestBody @Valid MemberLoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest request) {
         LoginResponse loginResponse = authService.login(request);
         return ResponseEntity.status(HttpStatus.OK).body(loginResponse);
     }
@@ -84,5 +85,19 @@ public class AuthController {
         String newAccessToken = this.authService.refreshAccessToken(refreshToken, email);
         return ResponseEntity.status(HttpStatus.OK).body(newAccessToken);
     }
+
+    /**
+     * 로그아웃
+     * 1. Redis내의 refresh_token 삭제
+     * 2. Redis에 현재 access_token을 logout 상태로 등록
+     * - 2.1. 해당 access_token의 남은 유효시간을 Redis의 TTL로 등록
+     * 3. JwtTokenFilter 파일의 doFIlterInternal 메소드에서 redis에 logout 상태인지 검증하는 로직 추가
+     * */
+    @DeleteMapping("/api/v1/auth/logout")
+    public ResponseEntity<?> logout(@RequestBody LogoutRequest request) {
+        authService.logout(request);
+        return ResponseEntity.status(HttpStatus.OK).body("User logout!");
+    }
+
 
 }

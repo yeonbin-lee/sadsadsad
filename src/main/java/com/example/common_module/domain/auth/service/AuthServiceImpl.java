@@ -1,13 +1,13 @@
 package com.example.common_module.domain.auth.service;
 
-import com.example.common_module.domain.auth.controller.vo.TermAcceptance;
+import com.example.common_module.domain.auth.controller.dto.request.LogoutRequest;
 import com.example.common_module.domain.member.controller.vo.KakaoInfo;
-import com.example.common_module.domain.auth.controller.dto.request.MemberSignupRequest;
+import com.example.common_module.domain.auth.controller.dto.request.SignupRequest;
 import com.example.common_module.domain.member.controller.vo.KakaoToken;
 import com.example.common_module.domain.auth.controller.dto.response.LoginResponse;
-import com.example.common_module.domain.member.entity.MemberTerm;
-import com.example.common_module.domain.member.entity.Term;
+import com.example.common_module.domain.member.entity.Logout;
 import com.example.common_module.domain.member.entity.enums.Provider;
+import com.example.common_module.domain.member.repository.LogoutRepository;
 import com.example.common_module.domain.member.repository.MemberTermRepository;
 import com.example.common_module.domain.member.repository.TermRepository;
 import com.example.common_module.global.config.jwt.CustomUserDetails;
@@ -15,7 +15,7 @@ import com.example.common_module.global.config.jwt.JwtTokenProvider;
 import com.example.common_module.global.config.jwt.RefreshToken;
 import com.example.common_module.global.config.jwt.RefreshTokenRepository;
 import com.example.common_module.domain.auth.controller.dto.request.OauthMemberLoginRequest;
-import com.example.common_module.domain.auth.controller.dto.request.MemberLoginRequest;
+import com.example.common_module.domain.auth.controller.dto.request.LoginRequest;
 import com.example.common_module.domain.member.entity.enums.Gender;
 import com.example.common_module.domain.member.entity.Member;
 import com.example.common_module.domain.member.entity.enums.Role;
@@ -39,11 +39,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Date;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -56,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final KakaoClient kakaoClient;
     private final MemberTermRepository memberTermRepository;
-
+    private final LogoutRepository logoutRepository;
 
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String KAKAO_CLIENT_ID;
@@ -73,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
      * 중복 없을 시 member 저장
      * */
     @Transactional
-    public void signup(MemberSignupRequest request) {
+    public void signup(SignupRequest request) {
 
         // CHECK EMAIL, PHONE, NICKNAME DUPLICATE
         if(memberRepository.existsByEmail(request.getEmail())){
@@ -99,6 +96,15 @@ public class AuthServiceImpl implements AuthService {
                 .role(Role.ROLE_USER)
                 .provider(Provider.NORMAL)
                 .build();
+//        Member member = new Member();
+//        member.setEmail(request.getEmail());
+//        member.setNickname(request.getNickname());
+//        member.setPhone(request.getPhone());
+//        member.setGender(request.getGender());
+//        member.setPassword(passwordEncoder.encode(request.getPassword()));
+//        member.setBirthday(request.getBirthday());
+//        member.setRole(Role.ROLE_USER);
+//        member.setProvider(Provider.NORMAL);
 
         memberRepository.save(member);
 
@@ -191,7 +197,7 @@ public class AuthServiceImpl implements AuthService {
 
     /** [일반] 로그인 API */
     @Transactional
-    public LoginResponse login(MemberLoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         // CHECK EMAIL AND PASSWORD
         Member member = this.memberRepository.findByEmail(request.getEmail()).orElseThrow(
                 () -> new UserNotFoundException(request.getEmail() + "은 존재하지 않는 이메일 정보입니다."));
@@ -373,5 +379,31 @@ public class AuthServiceImpl implements AuthService {
             return newAccessToken;
         }
         return null;
+    }
+
+    public void logout(LogoutRequest request) {
+        String email = request.getEmail();
+        String accessToken = request.getAccessToken();
+
+        // Redis 내의 기존 refreshToken 삭제
+        if (!refreshTokenRepository.existsById(email)){
+            // 리프레시 토큰 없다고 예외처리 날려야됨
+        }
+        refreshTokenRepository.deleteById(email);
+
+
+        // access_token의 남은 유효시간 가져오기 (Seconds 단위)
+        Date expirationFromToken = jwtTokenProvider.getExpirationFromToken(accessToken);
+        Date today = new Date();
+        Integer sec = (int) ((expirationFromToken.getTime() - today.getTime()) / 1000);
+
+        // access_token을 Redis의 key 값으로 등록
+        logoutRepository.save(
+                Logout.builder()
+                        .id(accessToken)
+                        .data("logout")
+                        .expiration(sec)
+                        .build()
+                );
     }
 }
