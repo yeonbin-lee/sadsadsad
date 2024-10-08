@@ -2,6 +2,7 @@ HELP.md
 .gradle
 # 내가 직접 추가
 application.yml
+/src/main/resources/firebase/firebase_service_key.json
 
 build/
 !gradle/wrapper/gradle-wrapper.jar
